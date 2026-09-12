@@ -27,147 +27,203 @@ export const PreviewPanel: React.FC<PreviewPanelProps> = ({ data }) => {
     return () => observer.disconnect();
   }, []);
 
+  useEffect(() => {
+    const handleBeforePrint = () => {
+      document.title = '';
+    };
+    const handleAfterPrint = () => {
+      document.title = 'Clinical Exam Hub - Medico-Legal Accused Examination';
+    };
+    window.addEventListener('beforeprint', handleBeforePrint);
+    window.addEventListener('afterprint', handleAfterPrint);
+    return () => {
+      window.removeEventListener('beforeprint', handleBeforePrint);
+      window.removeEventListener('afterprint', handleAfterPrint);
+    };
+  }, []);
+
   const handlePrint = () => {
+    const originalTitle = document.title;
+    document.title = '';
     window.print();
+    setTimeout(() => {
+      document.title = originalTitle || 'Clinical Exam Hub - Medico-Legal Accused Examination';
+    }, 1000);
   };
 
-  const renderPrintSvg = (view: 'anterior_posterior' | 'lateral_inner' | 'genital') => {
+  const renderVerticalLegend = () => (
+    <div style={{ width: '195px', fontSize: '8pt', lineHeight: '1.35', flexShrink: 0, paddingRight: '8px' }}>
+      <div style={{ fontWeight: 'bold', marginBottom: '8px', textTransform: 'uppercase', fontSize: '8.5pt' }}>
+        LEGEND: TYPES OF FINDINGS
+      </div>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '1px' }}>
+        <div>AB Abrasion</div>
+        <div>ER Erythema (redness)</div>
+        <div>OI Other Injury (describe)</div>
+        <div>ALS Alternate Light Source</div>
+        <div>F/H Fiber/Hair</div>
+        <div>PE Petechiae</div>
+        <div>BI Bite</div>
+        <div>FB Foreign Body</div>
+        <div>PS Potential Saliva</div>
+        <div>BU Burn</div>
+        <div>IN Induration</div>
+        <div>SHX Sample Per History</div>
+        <div>DE Debris</div>
+        <div>IW Incised Wound</div>
+        <div>SI Suction Injury</div>
+        <div>DF Deformity</div>
+        <div>LA Laceration</div>
+        <div>SW Swelling</div>
+        <div>DS Dry Secretion</div>
+        <div>MS Moist Secretion</div>
+        <div>TB Toluidine Blue</div>
+        <div>EC Ecchymosis (bruise)</div>
+        <div>OF Other Foreign Material (describe)</div>
+        <div>TE Tenderness</div>
+        <div>V/S Vegetation/Soil</div>
+      </div>
+    </div>
+  );
+
+  const renderPrintDiagram = (view: 'anterior_posterior' | 'lateral_inner' | 'genital') => {
     const marks = data.bodyMapMarks.filter(m => m.view === view);
 
     switch (view) {
       case 'anterior_posterior':
         return (
-          <div style={{ display: 'flex', justifyContent: 'center', margin: '10px 0', position: 'relative', height: '180px' }}>
-            <svg viewBox="0 0 200 100" style={{ height: '100%', width: 'auto', border: '1px solid #ccc' }}>
-              <g transform="translate(10, 0)">
-                <text x="40" y="8" fill="black" fontSize="5" fontWeight="bold" textAnchor="middle">ANTERIOR VIEW</text>
-                <circle cx="40" cy="18" r="7" fill="none" stroke="black" strokeWidth="1" />
-                <path d="M 37,25 L 37,30 M 43,25 L 43,30" stroke="black" strokeWidth="1" />
-                <path d="M 28,33 Q 32,30 40,30 Q 48,30 52,33 L 56,60 Q 57,63 54,63 L 50,62 L 48,38 L 47,80 L 41,80 L 41,50 L 39,50 L 39,80 L 33,80 L 32,38 L 30,62 L 26,63 Q 23,63 24,60 Z" fill="none" stroke="black" strokeWidth="1" />
-                <path d="M 33,80 L 31,95 L 34,95 Z" fill="none" stroke="black" strokeWidth="1" />
-                <path d="M 47,80 L 49,95 L 46,95 Z" fill="none" stroke="black" strokeWidth="1" />
-              </g>
-              <g transform="translate(110, 0)">
-                <text x="40" y="8" fill="black" fontSize="5" fontWeight="bold" textAnchor="middle">POSTERIOR VIEW</text>
-                <circle cx="40" cy="18" r="7" fill="none" stroke="black" strokeWidth="1" />
-                <path d="M 37,25 L 37,30 M 43,25 L 43,30" stroke="black" strokeWidth="1" />
-                <path d="M 40,30 L 40,58" stroke="black" strokeWidth="0.5" strokeDasharray="1" />
-                <path d="M 28,33 Q 32,30 40,30 Q 48,30 52,33 L 56,60 Q 57,63 54,63 L 50,62 L 48,38 L 47,80 L 41,80 L 41,50 L 39,50 L 39,80 L 33,80 L 32,38 L 30,62 L 26,63 Q 23,63 24,60 Z" fill="none" stroke="black" strokeWidth="1" />
-                <path d="M 33,80 L 31,95 L 34,95 Z" fill="none" stroke="black" strokeWidth="1" />
-                <path d="M 47,80 L 49,95 L 46,95 Z" fill="none" stroke="black" strokeWidth="1" />
-              </g>
-            </svg>
-            {marks.map(mark => (
-              <div
-                key={mark.id}
-                style={{
-                  position: 'absolute',
-                  left: `calc(50% - 180px + ${mark.x * 3.6}px)`,
-                  top: `${mark.y * 1.8}px`,
-                  backgroundColor: 'red',
-                  color: 'white',
-                  borderRadius: '50%',
-                  width: '14px',
-                  height: '14px',
-                  fontSize: '7px',
-                  fontWeight: 'bold',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  transform: 'translate(-50%, -50%)',
-                  border: '1.5px solid white',
-                  boxShadow: '0 1px 3px rgba(0,0,0,0.5)',
-                  WebkitPrintColorAdjust: 'exact',
-                  colorAdjust: 'exact',
-                } as React.CSSProperties}
-              >
-                {mark.type}
+          <div style={{ flex: 1, borderLeft: '1px solid #000', borderRight: '1px solid #000', padding: '8px 12px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+            <div style={{ position: 'relative', display: 'inline-block' }}>
+              <img
+                src="image1.png"
+                alt="Body Map - Anterior and Posterior View"
+                style={{ maxHeight: '420px', maxWidth: '100%', display: 'block', margin: '0 auto' }}
+              />
+              {marks.map(mark => (
+                <div
+                  key={mark.id}
+                  style={{
+                    position: 'absolute',
+                    left: `${mark.x}%`,
+                    top: `${mark.y}%`,
+                    backgroundColor: '#d32f2f',
+                    color: 'white',
+                    borderRadius: '50%',
+                    width: '18px',
+                    height: '18px',
+                    fontSize: '8px',
+                    fontWeight: 'bold',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    transform: 'translate(-50%, -50%)',
+                    border: '1.5px solid white',
+                    boxShadow: '0 1px 3px rgba(0,0,0,0.6)',
+                    WebkitPrintColorAdjust: 'exact',
+                    colorAdjust: 'exact',
+                  }}
+                  title={`${mark.type}: ${mark.description}`}
+                >
+                  {mark.type}
+                </div>
+              ))}
+            </div>
+            <div style={{ width: '100%', maxWidth: '340px', marginTop: '8px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: 'bold', fontSize: '9pt' }}>
+                <span>RIGHT</span>
+                <span>LEFT</span>
+                <span>LEFT</span>
+                <span>RIGHT</span>
               </div>
-            ))}
+              <div style={{ display: 'flex', justifyContent: 'space-around', fontSize: '9pt', marginTop: '2px' }}>
+                <span style={{ flex: 1, textAlign: 'center' }}>ANTERIOR</span>
+                <span style={{ flex: 1, textAlign: 'center' }}>POSTERIOR</span>
+              </div>
+            </div>
           </div>
         );
       case 'lateral_inner':
         return (
-          <div style={{ display: 'flex', justifyContent: 'center', margin: '10px 0', position: 'relative', height: '180px' }}>
-            <svg viewBox="0 0 200 100" style={{ height: '100%', width: 'auto', border: '1px solid #ccc' }}>
-              <g transform="translate(10, 0)">
-                <text x="40" y="8" fill="black" fontSize="5" fontWeight="bold" textAnchor="middle">LATERAL RIGHT</text>
-                <path d="M 40,12 C 45,12 47,15 45,18 C 43,21 44,23 42,25 C 41,26 42,28 40,30 L 40,33 L 43,33 L 42,60 C 42,65 39,78 37,95 L 34,95 L 36,65 L 34,35 C 34,30 35,12 40,12 Z" fill="none" stroke="black" strokeWidth="1" />
-              </g>
-              <g transform="translate(110, 0)">
-                <text x="40" y="8" fill="black" fontSize="5" fontWeight="bold" textAnchor="middle">LATERAL LEFT</text>
-                <path d="M 40,12 C 35,12 33,15 35,18 C 37,21 36,23 38,25 C 39,26 38,28 40,30 L 40,33 L 37,33 L 38,60 C 38,65 41,78 43,95 L 46,95 L 44,65 L 46,35 C 46,30 45,12 40,12 Z" fill="none" stroke="black" strokeWidth="1" />
-              </g>
-            </svg>
-            {marks.map(mark => (
-              <div
-                key={mark.id}
-                style={{
-                  position: 'absolute',
-                  left: `calc(50% - 180px + ${mark.x * 3.6}px)`,
-                  top: `${mark.y * 1.8}px`,
-                  backgroundColor: 'red',
-                  color: 'white',
-                  borderRadius: '50%',
-                  width: '14px',
-                  height: '14px',
-                  fontSize: '7px',
-                  fontWeight: 'bold',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  transform: 'translate(-50%, -50%)',
-                  border: '1.5px solid white',
-                  boxShadow: '0 1px 3px rgba(0,0,0,0.5)',
-                  WebkitPrintColorAdjust: 'exact',
-                  colorAdjust: 'exact',
-                } as React.CSSProperties}
-              >
-                {mark.type}
-              </div>
-            ))}
+          <div style={{ flex: 1, borderLeft: '1px solid #000', borderRight: '1px solid #000', padding: '8px 12px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+            <div style={{ position: 'relative', display: 'inline-block' }}>
+              <img
+                src="image2.png"
+                alt="Body Map - Lateral & Inner Views"
+                style={{ maxHeight: '430px', maxWidth: '100%', display: 'block', margin: '0 auto' }}
+              />
+              {marks.map(mark => (
+                <div
+                  key={mark.id}
+                  style={{
+                    position: 'absolute',
+                    left: `${mark.x}%`,
+                    top: `${mark.y}%`,
+                    backgroundColor: '#d32f2f',
+                    color: 'white',
+                    borderRadius: '50%',
+                    width: '18px',
+                    height: '18px',
+                    fontSize: '8px',
+                    fontWeight: 'bold',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    transform: 'translate(-50%, -50%)',
+                    border: '1.5px solid white',
+                    boxShadow: '0 1px 3px rgba(0,0,0,0.6)',
+                    WebkitPrintColorAdjust: 'exact',
+                    colorAdjust: 'exact',
+                  }}
+                  title={`${mark.type}: ${mark.description}`}
+                >
+                  {mark.type}
+                </div>
+              ))}
+            </div>
           </div>
         );
       case 'genital':
         return (
-          <div style={{ display: 'flex', justifyContent: 'center', margin: '10px 0', position: 'relative', height: '180px' }}>
-            <svg viewBox="0 0 200 100" style={{ height: '100%', width: 'auto', border: '1px solid #ccc' }}>
-              <text x="100" y="10" fill="black" fontSize="5" fontWeight="bold" textAnchor="middle">GENITAL DETAILED REGIONAL VIEW</text>
-              <g transform="translate(50, 15)">
-                <path d="M 10,10 L 40,40 L 40,80" fill="none" stroke="black" strokeWidth="1" />
-                <path d="M 90,10 L 60,40 L 60,80" fill="none" stroke="black" strokeWidth="1" />
-                <ellipse cx="50" cy="45" rx="8" ry="15" fill="none" stroke="black" strokeWidth="1" />
-                <circle cx="46" cy="62" r="5" fill="none" stroke="black" strokeWidth="1" />
-                <circle cx="54" cy="62" r="5" fill="none" stroke="black" strokeWidth="1" />
-              </g>
-            </svg>
-            {marks.map(mark => (
-              <div
-                key={mark.id}
-                style={{
-                  position: 'absolute',
-                  left: `calc(50% - 180px + ${mark.x * 3.6}px)`,
-                  top: `${mark.y * 1.8}px`,
-                  backgroundColor: 'red',
-                  color: 'white',
-                  borderRadius: '50%',
-                  width: '14px',
-                  height: '14px',
-                  fontSize: '7px',
-                  fontWeight: 'bold',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  transform: 'translate(-50%, -50%)',
-                  border: '1.5px solid white',
-                  boxShadow: '0 1px 3px rgba(0,0,0,0.5)',
-                  WebkitPrintColorAdjust: 'exact',
-                  colorAdjust: 'exact',
-                } as React.CSSProperties}
-              >
-                {mark.type}
-              </div>
-            ))}
+          <div style={{ flex: 1, borderRight: '1px solid #000', padding: '8px 12px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+            <div style={{ width: '100%', display: 'flex', justifyContent: 'space-around', fontWeight: 'bold', fontSize: '10pt', marginBottom: '8px', maxWidth: '280px' }}>
+              <span>RIGHT</span>
+              <span>LEFT</span>
+            </div>
+            <div style={{ position: 'relative', display: 'inline-block' }}>
+              <img
+                src="image3.png"
+                alt="Genital Map Chart - Detailed Regional Views"
+                style={{ maxHeight: '390px', maxWidth: '100%', display: 'block', margin: '0 auto' }}
+              />
+              {marks.map(mark => (
+                <div
+                  key={mark.id}
+                  style={{
+                    position: 'absolute',
+                    left: `${mark.x}%`,
+                    top: `${mark.y}%`,
+                    backgroundColor: '#d32f2f',
+                    color: 'white',
+                    borderRadius: '50%',
+                    width: '18px',
+                    height: '18px',
+                    fontSize: '8px',
+                    fontWeight: 'bold',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    transform: 'translate(-50%, -50%)',
+                    border: '1.5px solid white',
+                    boxShadow: '0 1px 3px rgba(0,0,0,0.6)',
+                    WebkitPrintColorAdjust: 'exact',
+                    colorAdjust: 'exact',
+                  }}
+                  title={`${mark.type}: ${mark.description}`}
+                >
+                  {mark.type}
+                </div>
+              ))}
+            </div>
           </div>
         );
     }
@@ -280,7 +336,7 @@ export const PreviewPanel: React.FC<PreviewPanelProps> = ({ data }) => {
       </div>
 
       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%' }}>
-        <div style={wrapperStyle}>
+        <div className="preview-pages-wrapper preview-scaler" style={wrapperStyle}>
 
         {/* PAGE 1 */}
         <div className="report-paper">
@@ -344,24 +400,39 @@ export const PreviewPanel: React.FC<PreviewPanelProps> = ({ data }) => {
           </div>
 
           <div className="report-section">
-            <div className="data-row">
-              <span className="data-label" style={{ whiteSpace: 'nowrap' }}>3. Examined in presence of</span>
-              <span className="data-value">{data.accusedParticulars.examinedPresenceOf}</span>
+            <div className="data-row" style={{ alignItems: 'baseline' }}>
+              <span className="data-label" style={{ fontWeight: 'bold', whiteSpace: 'nowrap' }}>3. Examined in presence of.....................................................................................................................................</span>
+              <span className="data-value" style={{ display: 'none' }}>{data.accusedParticulars.examinedPresenceOf}</span>
             </div>
-            <div className="data-row">
-              <span className="data-label">Place of Examination.</span>
-              <span className="data-value">{data.accusedParticulars.placeOfExamination}</span>
+            {data.accusedParticulars.examinedPresenceOf && (
+              <div style={{ fontStyle: 'italic', paddingLeft: '24px', fontSize: '9pt', color: '#333' }}>
+                ({data.accusedParticulars.examinedPresenceOf})
+              </div>
+            )}
+            <div style={{ paddingLeft: '40px', marginTop: '8px' }}>
+              <div style={{ fontSize: '10pt', lineHeight: '1.6' }}>
+                Place of Examination: - {data.accusedParticulars.placeOfExamination || 'Dept of FM&T, SCB MCH, KATAKA'}
+              </div>
+              <div style={{ fontSize: '10pt', lineHeight: '1.6' }}>
+                Date and Time of Examination: - {data.accusedParticulars.dateTimeOfExamination ? data.accusedParticulars.dateTimeOfExamination : '.................................................'}
+              </div>
             </div>
-            <div className="data-row">
-              <span className="data-label">Date and Time of Examination.</span>
-              <span className="data-value">{data.accusedParticulars.dateTimeOfExamination}</span>
-            </div>
-          </div>
 
-          <div className="photo-lti-box">
-            <div className="box-placeholder">CLEAR LTI</div>
-            <div className="box-placeholder">CLEAR RTI</div>
-            <div className="box-placeholder">PHOTO</div>
+            <table style={{ width: '100%', borderCollapse: 'collapse', marginTop: '16px', border: '1px solid #000' }}>
+              <tbody>
+                <tr>
+                  <td style={{ width: '33.33%', height: '150px', textAlign: 'center', verticalAlign: 'middle', border: '1px solid #000', fontSize: '11pt', fontWeight: 'bold', letterSpacing: '0.5px' }}>
+                    CLEAR LTI
+                  </td>
+                  <td style={{ width: '33.33%', height: '150px', textAlign: 'center', verticalAlign: 'middle', border: '1px solid #000', fontSize: '11pt', fontWeight: 'bold', letterSpacing: '0.5px' }}>
+                    CLEAR RTI
+                  </td>
+                  <td style={{ width: '33.33%', height: '150px', textAlign: 'center', verticalAlign: 'middle', border: '1px solid #000', fontSize: '11pt', fontWeight: 'bold', letterSpacing: '0.5px' }}>
+                    PHOTO
+                  </td>
+                </tr>
+              </tbody>
+            </table>
           </div>
 
           <div className="report-section">
@@ -647,17 +718,21 @@ export const PreviewPanel: React.FC<PreviewPanelProps> = ({ data }) => {
           </div>
         </div>
 
-        {/* PAGE 4 - Body Maps */}
+        {/* PAGE 4 - Body Map Anterior and Posterior */}
         <div className="report-paper page-break">
           <div className="report-section">
-            <div className="report-section-title">BODY MAP CHART – ANTERIOR AND POSTERIOR VIEW</div>
-            {renderPrintSvg('anterior_posterior')}
-            <div style={{ fontSize: '7.5pt', fontStyle: 'italic', margin: '5px 0' }}>
-              LEGEND/TYPES OF INJURIES: AB=Abrasion, ER=Erythema (Redness), OI=Other Injury (Red), ALS=Alternate Light Source, F/H=Fiber/Hair, PE=Petechiae, BI=Bite, FB=Foreign Body, PS=Potential Saliva, BU=Burn, IN=Induration, SHX=Sample Per History, DE=Debris, IW=Incised Wound, SI=Suction Injury, DF=Deformity, LA=Laceration, SW=Swelling, DS=Dry Secretion, MS=Moist Secretion, TB=Toluidine Blue, EC=Ecchymosis, OF=Other Foreign Material (Unverified), TE=Tenderness, V/S=Vegetation/Soil.
+            <div className="report-section-title" style={{ textAlign: 'center', fontSize: '11pt', fontWeight: 'bold', marginBottom: '14px', letterSpacing: '0.5px' }}>
+              BODY MAP CHART – ANTERIOR AND POSTERIOR VIEW
             </div>
-            <div style={{ fontWeight: 'bold', border: '1px solid black', padding: '6px', textAlign: 'center', marginTop: '5px' }}>
+            <div style={{ display: 'flex', alignItems: 'stretch', minHeight: '480px' }}>
+              {renderVerticalLegend()}
+              {renderPrintDiagram('anterior_posterior')}
+            </div>
+            <div style={{ border: '1px solid black', padding: '8px 12px', minHeight: '42px', marginTop: '12px' }}>
               {pMap.filter(m => m.view === 'anterior_posterior').length === 0 ? (
-                'NO INJURIES DETECTED IN THE ANTERIOR AND POSTERIOR PART OF BODY.'
+                <div style={{ textAlign: 'left', fontWeight: 'bold', fontSize: '9.5pt' }}>
+                  NO INJURIES DETECTED IN THE ANTERIOR AND POSTERIOR PART OF BODY.
+                </div>
               ) : (
                 <div style={{ textAlign: 'left', fontWeight: 'normal', fontSize: '9.5pt' }}>
                   <span style={{ fontWeight: 'bold' }}>Findings detected:</span>
@@ -672,16 +747,23 @@ export const PreviewPanel: React.FC<PreviewPanelProps> = ({ data }) => {
               )}
             </div>
           </div>
+        </div>
 
-          <div className="report-section" style={{ marginTop: '20px' }}>
-            <div className="report-section-title">BODY MAP CHART - LATERAL &amp; INNER VIEWS (RIGHT &amp; LEFT LEGS/BODY)</div>
-            {renderPrintSvg('lateral_inner')}
-            <div style={{ fontSize: '7.5pt', fontStyle: 'italic', margin: '5px 0' }}>
-              LEGEND/TYPES OF INJURIES: AB=Abrasion, ER=Erythema (Redness), OI=Other Injury (Red), ALS=Alternate Light Source, F/H=Fiber/Hair, PE=Petechiae, BI=Bite, FB=Foreign Body, PS=Potential Saliva, BU=Burn, IN=Induration, SHX=Sample Per History, DE=Debris, IW=Incised Wound, SI=Suction Injury, DF=Deformity, LA=Laceration, SW=Swelling, DS=Dry Secretion, MS=Moist Secretion, TB=Toluidine Blue, EC=Ecchymosis, OF=Other Foreign Material (Unverified), TE=Tenderness, V/S=Vegetation/Soil.
+        {/* PAGE 5 - Body Map Lateral & Inner Views */}
+        <div className="report-paper page-break">
+          <div className="report-section">
+            <div className="report-section-title" style={{ textAlign: 'center', fontSize: '11pt', fontWeight: 'bold', marginBottom: '14px', letterSpacing: '0.5px' }}>
+              BODY MAP CHART - LATERAL &amp; INNER VIEWS (RIGHT &amp; LEFT LEGS/BODY)
             </div>
-            <div style={{ fontWeight: 'bold', border: '1px solid black', padding: '6px', textAlign: 'center', marginTop: '5px' }}>
+            <div style={{ display: 'flex', alignItems: 'stretch', minHeight: '480px' }}>
+              {renderVerticalLegend()}
+              {renderPrintDiagram('lateral_inner')}
+            </div>
+            <div style={{ border: '1px solid black', padding: '8px 12px', minHeight: '42px', marginTop: '12px' }}>
               {pMap.filter(m => m.view === 'lateral_inner').length === 0 ? (
-                'NO INJURIES DETECTED.'
+                <div style={{ textAlign: 'left', fontWeight: 'bold', fontSize: '9.5pt' }}>
+                  NO INJURIES DETECTED
+                </div>
               ) : (
                 <div style={{ textAlign: 'left', fontWeight: 'normal', fontSize: '9.5pt' }}>
                   <span style={{ fontWeight: 'bold' }}>Findings detected:</span>
@@ -698,14 +780,21 @@ export const PreviewPanel: React.FC<PreviewPanelProps> = ({ data }) => {
           </div>
         </div>
 
-        {/* PAGE 5 - Genital Map */}
+        {/* PAGE 6 - Genital Map */}
         <div className="report-paper page-break">
           <div className="report-section">
-            <div className="report-section-title">GENITAL MAP CHART - DETAILED REGIONAL VIEWS (RIGHT &amp; LEFT)</div>
-            {renderPrintSvg('genital')}
-            <div style={{ fontWeight: 'bold', border: '1px solid black', padding: '6px', textAlign: 'center', marginTop: '5px' }}>
+            <div className="report-section-title" style={{ textAlign: 'center', fontSize: '11pt', fontWeight: 'bold', marginBottom: '14px', letterSpacing: '0.5px' }}>
+              GENITAL MAP CHART - DETAILED REGIONAL VIEWS (RIGHT &amp; LEFT)
+            </div>
+            <div style={{ display: 'flex', alignItems: 'stretch', minHeight: '480px' }}>
+              {renderVerticalLegend()}
+              {renderPrintDiagram('genital')}
+            </div>
+            <div style={{ border: '1px solid black', padding: '8px 12px', minHeight: '42px', marginTop: '12px' }}>
               {pMap.filter(m => m.view === 'genital').length === 0 ? (
-                'NO INJURIES DETECTED IN THE ABOVE DETAILED REGIONAL VIEWS.'
+                <div style={{ textAlign: 'left', fontWeight: 'bold', fontSize: '9.5pt' }}>
+                  NO INJURIES DETECTED IN THE ABOVE DETAILED REGIONAL VIEWS.
+                </div>
               ) : (
                 <div style={{ textAlign: 'left', fontWeight: 'normal', fontSize: '9.5pt' }}>
                   <span style={{ fontWeight: 'bold' }}>Findings detected:</span>
@@ -778,67 +867,68 @@ export const PreviewPanel: React.FC<PreviewPanelProps> = ({ data }) => {
         </div>
 
         {/* PAGE 7 - Potency Tests & Opinion */}
-        <div className="report-paper page-break">
-          <div className="report-section">
+        {/* PAGE 7 - Potency Tests & Opinion */}
+        <div className="report-paper page-break" style={{ display: 'flex', flexDirection: 'column' }}>
+          <div className="report-section" style={{ marginBottom: '8px' }}>
             <div className="data-row">
               <span className="data-label" style={{ fontWeight: 'bold' }}>7. X-ray for age estimation (if needed) :</span>
               <span className="data-value">NOT APPLICABLE.</span>
             </div>
           </div>
 
-          <div className="report-section" style={{ marginTop: '15px' }}>
+          <div className="report-section" style={{ marginBottom: '8px' }}>
             <div className="report-section-title">8. Tests advised for potency / impotency (Wherever required)</div>
 
             {data.potencyTests.isApplicable ? (
-              <div style={{ fontSize: '9.5pt' }}>
+              <div style={{ fontSize: '9pt' }}>
                 <div style={{ fontWeight: 'bold' }}>1. Blood Sample Collection (EDTA) for following tests:</div>
-                <ul style={{ marginLeft: '20px', marginTop: '5px' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '2px 8px', marginLeft: '12px', marginTop: '3px', fontSize: '8.5pt' }}>
                   {data.potencyTests.bloodTests.map(t => (
-                    <li key={t}>{t}</li>
+                    <div key={t}>• {t}</div>
                   ))}
-                </ul>
-                <div style={{ fontWeight: 'bold', marginTop: '10px' }}>2. Accused referred for special investigation for confirmation of potency (if required):</div>
-                <ul style={{ marginLeft: '20px', marginTop: '5px' }}>
+                </div>
+                <div style={{ fontWeight: 'bold', marginTop: '6px' }}>2. Accused referred for special investigation for confirmation of potency (if required):</div>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '2px 8px', marginLeft: '12px', marginTop: '3px', fontSize: '8.5pt' }}>
                   {data.potencyTests.specialInvestigations.map(t => (
-                    <li key={t}>{t}</li>
+                    <div key={t}>• {t}</div>
                   ))}
-                </ul>
+                </div>
               </div>
             ) : (
               <>
-                <div style={{ fontSize: '9.5pt', marginTop: '8px' }}>
-                  <div style={{ marginBottom: '6px' }}>1. Blood Sample Collection (EDTA) for following tests:</div>
-                  <ul style={{ marginLeft: '25px', fontSize: '9pt' }}>
-                    <li>GTT (Glucose Tolerance Test)</li>
-                    <li>Serum Electrolytes</li>
-                    <li>Serum Creatinine</li>
-                    <li>Liver Function Tests (LFT)</li>
-                    <li>Full Blood Count, Hemogram, Esr, Hb</li>
-                    <li>Serum Prolactin Level</li>
-                    <li>Thyroid Function Test</li>
-                    <li>Serum Testosterone</li>
-                    <li>Sex Hormone Binding Globulin (SHBG)</li>
-                  </ul>
-                  <div style={{ marginTop: '8px', marginBottom: '6px' }}>2. Accused referred for special investigation for confirmation of potency (if required):</div>
-                  <ul style={{ marginLeft: '25px', fontSize: '9pt' }}>
-                    <li>Nocturnal Penile Tumescence (NPT)</li>
-                    <li>Cavernosography</li>
-                    <li>Pharmacologically Induced Penile Erection (PIPE) Test</li>
-                    <li>Doppler Studies</li>
-                    <li>Pudendal Arteriography</li>
-                    <li>Pharmacocavernosometry</li>
-                  </ul>
+                <div style={{ fontSize: '9pt', marginTop: '4px' }}>
+                  <div style={{ fontWeight: 'bold', marginBottom: '3px' }}>1. Blood Sample Collection (EDTA) for following tests:</div>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '2px 8px', marginLeft: '12px', fontSize: '8.5pt' }}>
+                    <div>• GTT (Glucose Tolerance Test)</div>
+                    <div>• Serum Electrolytes</div>
+                    <div>• Serum Creatinine</div>
+                    <div>• Liver Function Tests (LFT)</div>
+                    <div>• Full Blood Count, Hemogram</div>
+                    <div>• Serum Prolactin Level</div>
+                    <div>• Thyroid Function Test</div>
+                    <div>• Serum Testosterone</div>
+                    <div>• Sex Hormone Binding Globulin</div>
+                  </div>
+                  <div style={{ fontWeight: 'bold', marginTop: '6px', marginBottom: '3px' }}>2. Accused referred for special investigation for confirmation of potency (if required):</div>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '2px 8px', marginLeft: '12px', fontSize: '8.5pt' }}>
+                    <div>• Nocturnal Penile Tumescence</div>
+                    <div>• Cavernosography</div>
+                    <div>• PIPE Test</div>
+                    <div>• Doppler Studies</div>
+                    <div>• Arteriography</div>
+                    <div>• Pharmacocavernosometry</div>
+                  </div>
                 </div>
-                <div className="potency-warning-block" style={{ marginTop: '30px' }}>
+                <div className="potency-warning-block" style={{ margin: '6px 0', fontSize: '10.5pt' }}>
                   THE ABOVE-MENTIONED TEST IS NOT APPLICABLE.
                 </div>
               </>
             )}
           </div>
 
-          <div className="report-section" style={{ marginTop: '20px' }}>
+          <div className="report-section" style={{ marginBottom: '8px' }}>
             <div className="report-section-title">Opinion: (May be given as format attached as Appendix A)</div>
-            <div style={{ paddingLeft: '5px', marginTop: '8px', fontSize: '10pt', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+            <div style={{ paddingLeft: '5px', marginTop: '4px', fontSize: '9.5pt', display: 'flex', flexDirection: 'column', gap: '3px' }}>
               <div className="opinion-paragraph">
                 <span className="opinion-num">1.</span>
                 {data.opinion.sexualCapability || 'From examination of the physical & mental development & mental status, there was nothing detected to suggest that the accused is not capable of sexual intercourse.'}
@@ -866,17 +956,17 @@ export const PreviewPanel: React.FC<PreviewPanelProps> = ({ data }) => {
             </div>
           </div>
 
-          <div className="signature-block" style={{ marginTop: 'auto', paddingTop: '2rem' }}>
+          <div className="signature-block" style={{ marginTop: 'auto', paddingTop: '8px', breakInside: 'avoid', pageBreakInside: 'avoid' }}>
             <div>
               <div className="data-row" style={{ width: '220px' }}>
                 <span className="data-label">Station:</span>
                 <span className="data-value">{data.doctorDetails.station}</span>
               </div>
-              <div className="data-row" style={{ width: '220px', marginTop: '5px' }}>
+              <div className="data-row" style={{ width: '220px', marginTop: '4px' }}>
                 <span className="data-label">Date:</span>
                 <span className="data-value">{data.doctorDetails.date}</span>
               </div>
-              <div className="data-row" style={{ width: '220px', marginTop: '5px' }}>
+              <div className="data-row" style={{ width: '220px', marginTop: '4px' }}>
                 <span className="data-label">Time:</span>
                 <span className="data-value">{data.doctorDetails.time}</span>
               </div>
@@ -884,7 +974,7 @@ export const PreviewPanel: React.FC<PreviewPanelProps> = ({ data }) => {
 
             <div className="signature-right">
               <div>Signature ......................................................</div>
-              <div className="data-row" style={{ marginTop: '5px' }}>
+              <div className="data-row" style={{ marginTop: '4px' }}>
                 <span className="data-label">Name:</span>
                 <span className="data-value" style={{ fontWeight: 'bold' }}>{data.doctorDetails.name}</span>
               </div>
@@ -896,7 +986,7 @@ export const PreviewPanel: React.FC<PreviewPanelProps> = ({ data }) => {
                 <span className="data-label">Designation:</span>
                 <span className="data-value" style={{ fontSize: '9pt' }}>{data.doctorDetails.designation}</span>
               </div>
-              <div style={{ marginTop: '10px', height: '50px', border: '1px solid #aaa', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '8pt', color: '#666' }}>
+              <div style={{ marginTop: '6px', height: '42px', border: '1px solid #000', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '8.5pt', color: '#000', fontWeight: 'bold' }}>
                 Official seal
               </div>
             </div>

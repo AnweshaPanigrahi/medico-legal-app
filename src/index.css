@@ -636,15 +636,16 @@ body {
 .potency-warning-block {
   text-align: center;
   font-weight: bold;
-  letter-spacing: 1px;
-  margin: 2rem 0;
-  font-size: 12pt;
+  letter-spacing: 0.5px;
+  margin: 8px 0;
+  font-size: 10.5pt;
 }
 
 /* Opinion Block */
 .opinion-paragraph {
-  margin-bottom: 0.75rem;
+  margin-bottom: 0.35rem;
   text-align: justify;
+  line-height: 1.35;
 }
 
 .opinion-num {
@@ -653,10 +654,13 @@ body {
 }
 
 .signature-block {
-  margin-top: 2rem;
+  margin-top: 1rem;
   display: flex;
   justify-content: space-between;
-  font-size: 11pt;
+  align-items: flex-end;
+  font-size: 10pt;
+  page-break-inside: avoid !important;
+  break-inside: avoid !important;
 }
 
 .signature-right {
@@ -732,13 +736,21 @@ body {
   font-weight: bold;
 }
 
+/* Page setup - zero page margin suppresses browser default headers (date, title) & footers (URL) */
+@page {
+  size: A4 portrait;
+  margin: 0;
+}
+
 /* Printing Specific styles */
 @media print {
-  body {
+  html, body {
     background-color: white !important;
     color: black !important;
     padding: 0 !important;
     margin: 0 !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
   }
   
   .dashboard {
@@ -749,49 +761,63 @@ body {
 
   .form-panel,
   .preview-controls,
-  .actions-bar {
+  .actions-bar,
+  .modal-overlay {
     display: none !important;
   }
 
   .preview-panel {
     padding: 0 !important;
+    margin: 0 !important;
     background-color: white !important;
     height: auto !important;
     overflow: visible !important;
     display: block !important;
+    width: 100% !important;
+  }
+
+  .preview-scaler,
+  .preview-pages-wrapper {
+    transform: none !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
   }
 
   .report-paper {
     box-shadow: none !important;
-    padding: 0 !important;
+    border: none !important;
     margin: 0 !important;
+    /* Generous printable padding: 14mm top, 14mm right, 12mm bottom, 18mm left */
+    /* 18mm left margin guarantees no text clipping on the left edge */
+    padding: 14mm 14mm 12mm 18mm !important;
     width: 100% !important;
     max-width: 100% !important;
-    min-height: 0 !important;
-    border: none !important;
+    min-height: 297mm !important;
+    box-sizing: border-box !important;
     font-size: 11pt !important;
     line-height: 1.4 !important;
-    page-break-after: always;
+    page-break-after: always !important;
+    break-after: page !important;
   }
 
   .report-paper:last-child {
-    page-break-after: avoid;
+    page-break-after: avoid !important;
+    break-after: avoid !important;
   }
 
   /* Force page breaks in output naturally */
   .page-break {
-    page-break-before: always;
+    page-break-before: always !important;
+    break-before: page !important;
   }
   
   /* Avoid table splitting inside rows */
   tr {
-    page-break-inside: avoid;
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
   }
-}
-
-@page {
-  size: A4;
-  margin: 15mm;
 }
 
 /* Grid Layout for Potency and General Info */
