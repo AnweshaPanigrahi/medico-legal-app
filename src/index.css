@@ -838,6 +838,8 @@ body {
     overflow: visible !important;
   }
 
+  .dashboard-mobile-toggle,
+  .form-panel-wrapper,
   .form-panel,
   .preview-controls,
   .actions-bar,
@@ -845,11 +847,18 @@ body {
     display: none !important;
   }
 
-  .preview-panel {
+  .mobile-view-hidden {
+    display: block !important;
+  }
+
+  .preview-panel-container,
+  .preview-panel,
+  .preview-outer-container {
     padding: 0 !important;
     margin: 0 !important;
     background-color: white !important;
     height: auto !important;
+    min-height: 0 !important;
     overflow: visible !important;
     display: block !important;
     width: 100% !important;

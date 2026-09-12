@@ -359,7 +359,7 @@ export const PreviewPanel: React.FC<PreviewPanelProps> = ({ data }) => {
         </button>
       </div>
 
-      <div style={outerContainerStyle}>
+      <div className="preview-outer-container" style={outerContainerStyle}>
         <div ref={scalerRef} className="preview-pages-wrapper preview-scaler" style={wrapperStyle}>
 
         {/* PAGE 1 */}
