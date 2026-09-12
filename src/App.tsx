@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import type { ReportData } from './types/report';
 import { FormPanel } from './components/FormPanel';
 import { PreviewPanel } from './components/PreviewPanel';
-import { Save, FolderOpen, FilePlus, Trash2, X, Edit3, Eye } from 'lucide-react';
+import { Save, FolderOpen, FilePlus, Trash2, X, Edit3, Eye, Download } from 'lucide-react';
 
 const initialReportData: ReportData = {
   caseParticulars: {
@@ -169,6 +169,33 @@ function App() {
   const [drafts, setDrafts] = useState<DraftRecord[]>([]);
   const [showHistoryModal, setShowHistoryModal] = useState(false);
   const [mobileTab, setMobileTab] = useState<'form' | 'preview'>('form');
+  const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
+  const [isInstallable, setIsInstallable] = useState(false);
+
+  // Catch PWA beforeinstallprompt event
+  useEffect(() => {
+    const handleBeforeInstallPrompt = (e: Event) => {
+      e.preventDefault();
+      setDeferredPrompt(e);
+      setIsInstallable(true);
+    };
+
+    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+
+    return () => {
+      window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+    };
+  }, []);
+
+  const handleInstallApp = async () => {
+    if (!deferredPrompt) return;
+    deferredPrompt.prompt();
+    const { outcome } = await deferredPrompt.userChoice;
+    if (outcome === 'accepted') {
+      setIsInstallable(false);
+      setDeferredPrompt(null);
+    }
+  };
 
   // Load drafts list on mount
   useEffect(() => {
@@ -273,7 +300,12 @@ function App() {
         
         {/* Foot draft actions bar */}
         <div className="actions-bar">
-          <div style={{ display: 'flex', gap: '0.5rem' }}>
+          <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+            {isInstallable && (
+              <button className="btn btn-primary" onClick={handleInstallApp} style={{ background: '#0284c7', borderColor: '#0284c7' }} title="Install app to your device home screen">
+                <Download size={16} /> Install App
+              </button>
+            )}
             <button className="btn btn-secondary" onClick={saveCurrentDraft} title="Save to local browser history">
               <Save size={16} /> Save Draft
             </button>
