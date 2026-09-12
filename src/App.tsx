@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import type { ReportData } from './types/report';
 import { FormPanel } from './components/FormPanel';
 import { PreviewPanel } from './components/PreviewPanel';
-import { Save, FolderOpen, FilePlus, Trash2, X } from 'lucide-react';
+import { Save, FolderOpen, FilePlus, Trash2, X, Edit3, Eye } from 'lucide-react';
 
 const initialReportData: ReportData = {
   caseParticulars: {
@@ -168,6 +168,7 @@ function App() {
   const [reportData, setReportData] = useState<ReportData>(initialReportData);
   const [drafts, setDrafts] = useState<DraftRecord[]>([]);
   const [showHistoryModal, setShowHistoryModal] = useState(false);
+  const [mobileTab, setMobileTab] = useState<'form' | 'preview'>('form');
 
   // Load drafts list on mount
   useEffect(() => {
@@ -250,11 +251,25 @@ function App() {
 
   return (
     <div className="dashboard">
+      {/* Mobile/Small Screen View Switcher */}
+      <div className="dashboard-mobile-toggle">
+        <button
+          className={`mobile-toggle-btn ${mobileTab === 'form' ? 'active' : ''}`}
+          onClick={() => setMobileTab('form')}
+        >
+          <Edit3 size={15} /> Form Editor
+        </button>
+        <button
+          className={`mobile-toggle-btn ${mobileTab === 'preview' ? 'active' : ''}`}
+          onClick={() => setMobileTab('preview')}
+        >
+          <Eye size={15} /> Report Preview
+        </button>
+      </div>
+
       {/* Left side form controller container */}
-      <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
-        <div style={{ flex: 1, overflowY: 'auto' }}>
-          <FormPanel data={reportData} onChange={setReportData} />
-        </div>
+      <div className={`form-panel-wrapper ${mobileTab !== 'form' ? 'mobile-view-hidden' : ''}`}>
+        <FormPanel data={reportData} onChange={setReportData} />
         
         {/* Foot draft actions bar */}
         <div className="actions-bar">
@@ -273,7 +288,9 @@ function App() {
       </div>
 
       {/* Right side live print preview */}
-      <PreviewPanel data={reportData} />
+      <div className={`preview-panel-container ${mobileTab !== 'preview' ? 'mobile-view-hidden' : ''}`} style={{ flex: 1, height: '100%', minHeight: 0, overflow: 'hidden' }}>
+        <PreviewPanel data={reportData} />
+      </div>
 
       {/* Load Draft Overlay Modal */}
       {showHistoryModal && (

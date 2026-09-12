@@ -161,6 +161,14 @@ export const FormPanel: React.FC<FormPanelProps> = ({ data, onChange }) => {
     });
   };
 
+  const tabsRef = React.useRef<HTMLDivElement>(null);
+
+  const handleTabsWheel = (e: React.WheelEvent<HTMLDivElement>) => {
+    if (tabsRef.current && e.deltaY !== 0) {
+      tabsRef.current.scrollLeft += e.deltaY;
+    }
+  };
+
   return (
     <div className="form-panel">
       <div className="form-header">
@@ -168,7 +176,7 @@ export const FormPanel: React.FC<FormPanelProps> = ({ data, onChange }) => {
         <p>Medico-Legal Examination of Accused of Sexual Violence</p>
       </div>
 
-      <div className="form-tabs">
+      <div className="form-tabs" ref={tabsRef} onWheel={handleTabsWheel}>
         <button className={`tab-btn ${activeTab === 'case_info' ? 'active' : ''}`} onClick={() => setActiveTab('case_info')}>
           Case Info
         </button>

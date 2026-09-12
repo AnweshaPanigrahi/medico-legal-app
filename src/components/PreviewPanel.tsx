@@ -315,13 +315,37 @@ export const PreviewPanel: React.FC<PreviewPanelProps> = ({ data }) => {
     );
   };
 
+  const scalerRef = useRef<HTMLDivElement>(null);
+  const [scaledHeight, setScaledHeight] = useState<number | undefined>(undefined);
+
+  useEffect(() => {
+    const el = scalerRef.current;
+    if (!el) return;
+    const updateHeight = () => {
+      if (el) {
+        setScaledHeight(el.offsetHeight * scale);
+      }
+    };
+    updateHeight();
+    const observer = new ResizeObserver(updateHeight);
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [scale]);
+
   // Scale the wrapper to fit the available panel width
   const wrapperStyle: React.CSSProperties = {
     transform: `scale(${scale})`,
     transformOrigin: 'top center',
     width: `${A4_WIDTH_PX}px`,
-    // Compensate height so pages don't leave huge empty space when scaled down
-    marginBottom: scale < 1 ? `${(scale - 1) * 100}%` : '0',
+  };
+
+  const outerContainerStyle: React.CSSProperties = {
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    width: '100%',
+    height: scaledHeight ? `${scaledHeight}px` : 'auto',
+    overflow: 'hidden',
   };
 
   return (
@@ -335,8 +359,8 @@ export const PreviewPanel: React.FC<PreviewPanelProps> = ({ data }) => {
         </button>
       </div>
 
-      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%' }}>
-        <div className="preview-pages-wrapper preview-scaler" style={wrapperStyle}>
+      <div style={outerContainerStyle}>
+        <div ref={scalerRef} className="preview-pages-wrapper preview-scaler" style={wrapperStyle}>
 
         {/* PAGE 1 */}
         <div className="report-paper">
