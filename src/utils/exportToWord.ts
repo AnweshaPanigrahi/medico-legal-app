@@ -2,7 +2,7 @@ import {
   Document, Packer, Paragraph, TextRun, AlignmentType,
   Table, TableRow, TableCell, WidthType, BorderStyle,
   VerticalAlign, convertMillimetersToTwip, ImageRun,
-  Footer, PageNumber, NumberFormat
+  Footer, PageNumber
 } from "docx";
 import { saveAs } from "file-saver";
 import type { ReportData } from "../types/report";
