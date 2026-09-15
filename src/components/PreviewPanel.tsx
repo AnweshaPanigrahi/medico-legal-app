@@ -1,5 +1,6 @@
 import React, { useRef, useEffect, useState } from 'react';
 import type { ReportData } from '../types/report';
+import { exportToWord } from '../utils/exportToWord';
 
 interface PreviewPanelProps {
   data: ReportData;
@@ -354,9 +355,14 @@ export const PreviewPanel: React.FC<PreviewPanelProps> = ({ data }) => {
         <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
           📄 Report Preview (A4 Layout)
         </span>
-        <button className="btn btn-primary" onClick={handlePrint}>
-          Print or Save PDF
-        </button>
+        <div style={{ display: 'flex', gap: '8px' }}>
+          <button className="btn btn-secondary" onClick={() => exportToWord(data)}>
+            Download Word
+          </button>
+          <button className="btn btn-primary" onClick={handlePrint}>
+            Print or Save PDF
+          </button>
+        </div>
       </div>
 
       <div className="preview-outer-container" style={outerContainerStyle}>
@@ -442,21 +448,6 @@ export const PreviewPanel: React.FC<PreviewPanelProps> = ({ data }) => {
               </div>
             </div>
 
-            <table style={{ width: '100%', borderCollapse: 'collapse', marginTop: '16px', border: '1px solid #000' }}>
-              <tbody>
-                <tr>
-                  <td style={{ width: '33.33%', height: '150px', textAlign: 'center', verticalAlign: 'middle', border: '1px solid #000', fontSize: '11pt', fontWeight: 'bold', letterSpacing: '0.5px' }}>
-                    CLEAR LTI
-                  </td>
-                  <td style={{ width: '33.33%', height: '150px', textAlign: 'center', verticalAlign: 'middle', border: '1px solid #000', fontSize: '11pt', fontWeight: 'bold', letterSpacing: '0.5px' }}>
-                    CLEAR RTI
-                  </td>
-                  <td style={{ width: '33.33%', height: '150px', textAlign: 'center', verticalAlign: 'middle', border: '1px solid #000', fontSize: '11pt', fontWeight: 'bold', letterSpacing: '0.5px' }}>
-                    PHOTO
-                  </td>
-                </tr>
-              </tbody>
-            </table>
           </div>
 
           <div className="report-section">
@@ -471,6 +462,41 @@ export const PreviewPanel: React.FC<PreviewPanelProps> = ({ data }) => {
             </div>
           </div>
 
+        </div>
+
+        {/* PAGE 1.5 - LTI / RTI / PHOTO */}
+        <div className="report-paper page-break" style={{ display: 'flex', flexDirection: 'column' }}>
+          <div style={{ marginBottom: '12px', fontSize: '12pt', fontWeight: 'bold', textAlign: 'center' }}>
+            ACCUSED IDENTIFICATION (LTI / RTI / PHOTO)
+          </div>
+          <table style={{ width: '100%', flex: 1, borderCollapse: 'collapse', border: '2px solid #000', tableLayout: 'fixed', height: '100%' }}>
+            <tbody style={{ height: '100%' }}>
+              <tr style={{ height: '100%' }}>
+                <td style={{ width: '33.33%', textAlign: 'center', verticalAlign: 'middle', border: '2px solid #000', fontSize: '14pt', fontWeight: 'bold', letterSpacing: '1px', height: 'calc(297mm - 80px)' }}>
+                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', gap: '12px' }}>
+                    <div style={{ fontSize: '16pt', fontWeight: 'bold' }}>LTI</div>
+                    <div style={{ fontSize: '10pt', fontWeight: 'normal', color: '#555' }}>(Left Thumb Impression)</div>
+                  </div>
+                </td>
+                <td style={{ width: '33.33%', textAlign: 'center', verticalAlign: 'middle', border: '2px solid #000', fontSize: '14pt', fontWeight: 'bold', letterSpacing: '1px', height: 'calc(297mm - 80px)' }}>
+                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', gap: '12px' }}>
+                    <div style={{ fontSize: '16pt', fontWeight: 'bold' }}>RTI</div>
+                    <div style={{ fontSize: '10pt', fontWeight: 'normal', color: '#555' }}>(Right Thumb Impression)</div>
+                  </div>
+                </td>
+                <td style={{ width: '33.33%', textAlign: 'center', verticalAlign: 'middle', border: '2px solid #000', fontSize: '14pt', fontWeight: 'bold', letterSpacing: '1px', height: 'calc(297mm - 80px)' }}>
+                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', gap: '12px' }}>
+                    <div style={{ fontSize: '16pt', fontWeight: 'bold' }}>PHOTO</div>
+                    <div style={{ fontSize: '10pt', fontWeight: 'normal', color: '#555' }}>(Passport Size)</div>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        {/* PAGE 2 */}
+        <div className="report-paper page-break">
           <div className="report-section">
             <div className="report-section-title">Brief History:</div>
             <div className="data-row">
@@ -511,10 +537,7 @@ export const PreviewPanel: React.FC<PreviewPanelProps> = ({ data }) => {
               <span className="data-value">{data.history.changedClothes}</span>
             </div>
           </div>
-        </div>
 
-        {/* PAGE 2 */}
-        <div className="report-paper page-break">
           <div className="report-section">
             <div className="report-section-title">5. Physical examination</div>
             <div className="data-row">
@@ -949,7 +972,10 @@ export const PreviewPanel: React.FC<PreviewPanelProps> = ({ data }) => {
               </>
             )}
           </div>
+        </div>
 
+        {/* PAGE 8 - Opinion */}
+        <div className="report-paper page-break">
           <div className="report-section" style={{ marginBottom: '8px' }}>
             <div className="report-section-title">Opinion: (May be given as format attached as Appendix A)</div>
             <div style={{ paddingLeft: '5px', marginTop: '4px', fontSize: '9.5pt', display: 'flex', flexDirection: 'column', gap: '3px' }}>
@@ -1012,6 +1038,52 @@ export const PreviewPanel: React.FC<PreviewPanelProps> = ({ data }) => {
               </div>
               <div style={{ marginTop: '6px', height: '42px', border: '1px solid #000', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '8.5pt', color: '#000', fontWeight: 'bold' }}>
                 Official seal
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* PAGE 9 - Thumb Impressions & Photo */}
+        <div className="report-paper page-break">
+          <div className="report-section" style={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: '1fr 1fr 1fr',
+              border: '2px solid black',
+              flex: 1,
+              marginTop: '20px',
+              marginBottom: '20px'
+            }}>
+              <div style={{
+                borderRight: '2px solid black',
+                display: 'flex',
+                flexDirection: 'column',
+                justifyContent: 'center',
+                alignItems: 'center'
+              }}>
+                <div style={{ fontWeight: 'bold', fontSize: '14pt', marginBottom: '8px' }}>LTI</div>
+                <div style={{ fontSize: '10pt' }}>(Left Thumb Impression)</div>
+              </div>
+              
+              <div style={{
+                borderRight: '2px solid black',
+                display: 'flex',
+                flexDirection: 'column',
+                justifyContent: 'center',
+                alignItems: 'center'
+              }}>
+                <div style={{ fontWeight: 'bold', fontSize: '14pt', marginBottom: '8px' }}>RTI</div>
+                <div style={{ fontSize: '10pt' }}>(Right Thumb Impression)</div>
+              </div>
+
+              <div style={{
+                display: 'flex',
+                flexDirection: 'column',
+                justifyContent: 'center',
+                alignItems: 'center'
+              }}>
+                <div style={{ fontWeight: 'bold', fontSize: '14pt', marginBottom: '8px' }}>PHOTO</div>
+                <div style={{ fontSize: '10pt' }}>(Passport Size)</div>
               </div>
             </div>
           </div>
