@@ -186,16 +186,12 @@ export const PreviewPanel: React.FC<PreviewPanelProps> = ({ data }) => {
         );
       case 'genital':
         return (
-          <div style={{ flex: 1, borderRight: '1px solid #000', padding: '8px 12px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
-            <div style={{ width: '100%', display: 'flex', justifyContent: 'space-around', fontWeight: 'bold', fontSize: '10pt', marginBottom: '8px', maxWidth: '280px' }}>
-              <span>RIGHT</span>
-              <span>LEFT</span>
-            </div>
+          <div style={{ flex: 1, padding: '8px 12px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
             <div style={{ position: 'relative', display: 'inline-block' }}>
               <img
                 src={`data:image/png;base64,${image3Base64}`}
                 alt="Genital Map Chart - Detailed Regional Views"
-                style={{ maxHeight: '390px', maxWidth: '100%', display: 'block', margin: '0 auto' }}
+                style={{ maxHeight: '440px', maxWidth: '100%', display: 'block', margin: '0 auto' }}
               />
               {marks.map(mark => (
                 <div
@@ -792,7 +788,7 @@ export const PreviewPanel: React.FC<PreviewPanelProps> = ({ data }) => {
               BODY MAP CHART - LATERAL &amp; INNER VIEWS (RIGHT &amp; LEFT LEGS/BODY)
             </div>
             <div style={{ display: 'flex', alignItems: 'stretch', minHeight: '480px' }}>
-              {renderVerticalLegend()}
+              {/* No legend on lateral/inner page – matches original Word format */}
               {renderPrintDiagram('lateral_inner')}
             </div>
             <div style={{ border: '1px solid black', padding: '8px 12px', minHeight: '42px', marginTop: '12px' }}>
@@ -819,11 +815,7 @@ export const PreviewPanel: React.FC<PreviewPanelProps> = ({ data }) => {
         {/* PAGE 6 - Genital Map */}
         <div className="report-paper page-break">
           <div className="report-section">
-            <div className="report-section-title" style={{ textAlign: 'center', fontSize: '11pt', fontWeight: 'bold', marginBottom: '14px', letterSpacing: '0.5px' }}>
-              GENITAL MAP CHART - DETAILED REGIONAL VIEWS (RIGHT &amp; LEFT)
-            </div>
             <div style={{ display: 'flex', alignItems: 'stretch', minHeight: '480px' }}>
-              {renderVerticalLegend()}
               {renderPrintDiagram('genital')}
             </div>
             <div style={{ border: '1px solid black', padding: '8px 12px', minHeight: '42px', marginTop: '12px' }}>
@@ -918,13 +910,13 @@ export const PreviewPanel: React.FC<PreviewPanelProps> = ({ data }) => {
             {data.potencyTests.isApplicable ? (
               <div style={{ fontSize: '9pt' }}>
                 <div style={{ fontWeight: 'bold' }}>1. Blood Sample Collection (EDTA) for following tests:</div>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '2px 8px', marginLeft: '12px', marginTop: '3px', fontSize: '8.5pt' }}>
+                <div style={{ marginLeft: '12px', marginTop: '3px', fontSize: '8.5pt' }}>
                   {data.potencyTests.bloodTests.map(t => (
                     <div key={t}>• {t}</div>
                   ))}
                 </div>
                 <div style={{ fontWeight: 'bold', marginTop: '6px' }}>2. Accused referred for special investigation for confirmation of potency (if required):</div>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '2px 8px', marginLeft: '12px', marginTop: '3px', fontSize: '8.5pt' }}>
+                <div style={{ marginLeft: '12px', marginTop: '3px', fontSize: '8.5pt' }}>
                   {data.potencyTests.specialInvestigations.map(t => (
                     <div key={t}>• {t}</div>
                   ))}
@@ -934,24 +926,24 @@ export const PreviewPanel: React.FC<PreviewPanelProps> = ({ data }) => {
               <>
                 <div style={{ fontSize: '9pt', marginTop: '4px' }}>
                   <div style={{ fontWeight: 'bold', marginBottom: '3px' }}>1. Blood Sample Collection (EDTA) for following tests:</div>
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '2px 8px', marginLeft: '12px', fontSize: '8.5pt' }}>
+                  <div style={{ marginLeft: '12px', fontSize: '8.5pt' }}>
                     <div>• GTT (Glucose Tolerance Test)</div>
                     <div>• Serum Electrolytes</div>
                     <div>• Serum Creatinine</div>
                     <div>• Liver Function Tests (LFT)</div>
-                    <div>• Full Blood Count, Hemogram</div>
+                    <div>• Full Blood Count, Hemogram, Esr, Hb</div>
                     <div>• Serum Prolactin Level</div>
                     <div>• Thyroid Function Test</div>
                     <div>• Serum Testosterone</div>
-                    <div>• Sex Hormone Binding Globulin</div>
+                    <div>• Sex Hormone Binding Globulin (SHBG)</div>
                   </div>
                   <div style={{ fontWeight: 'bold', marginTop: '6px', marginBottom: '3px' }}>2. Accused referred for special investigation for confirmation of potency (if required):</div>
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '2px 8px', marginLeft: '12px', fontSize: '8.5pt' }}>
-                    <div>• Nocturnal Penile Tumescence</div>
+                  <div style={{ marginLeft: '12px', fontSize: '8.5pt' }}>
+                    <div>• Nocturnal Penile Tumescence (NPT)</div>
                     <div>• Cavernosography</div>
-                    <div>• PIPE Test</div>
+                    <div>• Pharmacologically Induced Penile Erection (PIPE) Test</div>
                     <div>• Doppler Studies</div>
-                    <div>• Arteriography</div>
+                    <div>• Pudendal Arteriography</div>
                     <div>• Pharmacocavernosometry</div>
                   </div>
                 </div>

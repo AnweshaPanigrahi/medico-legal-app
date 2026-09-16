@@ -147,15 +147,11 @@ export const BodyMapAnnotator: React.FC<BodyMapAnnotatorProps> = ({ value, onCha
             onClick={handleDiagramClick}
             style={{ position: 'relative', display: 'inline-block', cursor: 'crosshair', maxWidth: '100%', userSelect: 'none' }}
           >
-            <div style={{ display: 'flex', justifyContent: 'space-around', fontWeight: 'bold', fontSize: '11px', marginBottom: '6px', maxWidth: '280px', margin: '0 auto 6px auto' }}>
-              <span>RIGHT</span>
-              <span>LEFT</span>
-            </div>
             <div style={{ display: 'inline-block', background: '#fff', padding: '4px', borderRadius: '4px' }}>
               <img
                 src={`data:image/png;base64,${image3Base64}`}
                 alt="Genital Map Regional Views"
-                style={{ maxHeight: '380px', maxWidth: '100%', display: 'block', pointerEvents: 'none', margin: '0 auto' }}
+                style={{ maxHeight: '420px', maxWidth: '100%', display: 'block', pointerEvents: 'none', margin: '0 auto' }}
               />
             </div>
             {filteredMarks.map((mark) => (

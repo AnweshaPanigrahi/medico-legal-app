@@ -148,10 +148,12 @@ function bodyImageParts(
   topCaption: string,
   marks: ReportData["bodyMapMarks"],
   noInjuryText: string,
-  showDirectionLabels = false
+  showDirectionLabels = false,
+  showLegend = true,
+  tableBorders: typeof ALL_BORDERS | typeof NO_BORDERS = ALL_BORDERS
 ): [Table, Table] {
 
-  // Build children for the image cell (no border)
+  // Build children for the image cell
   const imageCellChildren: Paragraph[] = [];
 
   // Top caption (e.g. "RIGHT        LEFT" for genital chart)
@@ -201,33 +203,43 @@ function bodyImageParts(
     );
   }
 
-  // Two-column table:  legend (NO border)  |  image (NO border)
+  // Legend entries column
+  const legendCellChildren: Paragraph[] = showLegend ? [
+    new Paragraph({
+      children: [new TextRun({ text: "LEGEND: TYPES OF FINDINGS", bold: true, size: 16 })],
+      spacing: { after: 60 },
+    }),
+    ...LEGEND_TEXTS.map(t =>
+      new Paragraph({
+        children: [new TextRun({ text: t, size: 14 })],
+        spacing: { before: 0, after: 20 },
+      })
+    ),
+  ] : [new Paragraph({ text: "" })];
+
   const chartTable = new Table({
     width: { size: 100, type: WidthType.PERCENTAGE },
+    borders: tableBorders,
     rows: [
       new TableRow({
-        children: [
-          // ── Legend — NO border, plain text
+        children: showLegend ? [
+          // ── Legend column
           new TableCell({
             width: { size: 30, type: WidthType.PERCENTAGE },
-            borders: NO_BORDERS,
-            children: [
-              new Paragraph({
-                children: [new TextRun({ text: "LEGEND: TYPES OF FINDINGS", bold: true, size: 16 })],
-                spacing: { after: 60 },
-              }),
-              ...LEGEND_TEXTS.map(t =>
-                new Paragraph({
-                  children: [new TextRun({ text: t, size: 14 })],
-                  spacing: { before: 0, after: 20 },
-                })
-              ),
-            ],
+            borders: tableBorders,
+            children: legendCellChildren,
           }),
-          // ── Image — NO border (matches reference images)
+          // ── Image
           new TableCell({
             width: { size: 70, type: WidthType.PERCENTAGE },
-            borders: NO_BORDERS,
+            borders: tableBorders,
+            children: imageCellChildren,
+          }),
+        ] : [
+          // ── Full width image (for composite charts that include their own legend)
+          new TableCell({
+            width: { size: 100, type: WidthType.PERCENTAGE },
+            borders: tableBorders,
             children: imageCellChildren,
           }),
         ],
@@ -537,24 +549,32 @@ export const exportToWord = async (data: ReportData) => {
 
         // ── Body Map Charts ────────────────────────────────────────────────
         ...(() => {
+          // Anterior/Posterior: show legend with borders
           const [apChart, apBox] = bodyImageParts(
             img1, 320, 400, "",
             bodyMapMarks.filter(m => m.view === "anterior_posterior"),
             "NO INJURIES DETECTED IN THE ANTERIOR AND POSTERIOR PART OF BODY.",
-            true
+            true,   // showDirectionLabels
+            true,   // showLegend
+            ALL_BORDERS
           );
+          // Lateral/Inner: show legend with borders (matches reference pic 2)
           const [liChart, liBox] = bodyImageParts(
             img2, 320, 400, "",
             bodyMapMarks.filter(m => m.view === "lateral_inner"),
             "NO INJURIES DETECTED IN THE LATERAL AND INNER VIEWS.",
-            false
+            false,  // showDirectionLabels
+            true,   // showLegend
+            ALL_BORDERS
           );
-          // Genital chart: top caption shows RIGHT / LEFT column headers
+          // Genital chart: composite image already has legend, title, labels and vertical line (matches user's screenshot)
           const [gChart, gBox] = bodyImageParts(
-            img3, 260, 340, "RIGHT                              LEFT",
+            img3, 460, 327, "",
             bodyMapMarks.filter(m => m.view === "genital"),
             "NO INJURIES DETECTED IN THE ABOVE DETAILED REGIONAL VIEWS.",
-            false
+            false,  // showDirectionLabels
+            false,  // showLegend
+            NO_BORDERS
           );
           return [
             // ── Page break + centered title for Body Map (Anterior/Posterior)
@@ -579,13 +599,8 @@ export const exportToWord = async (data: ReportData) => {
             sp(60, 60),
             liBox,
 
-            // ── Page break + centered title for Genital Map
+            // ── Page break for Genital Map
             new Paragraph({ text: "", pageBreakBefore: true }),
-            new Paragraph({
-              alignment: AlignmentType.CENTER,
-              children: [new TextRun({ text: "GENITAL MAP CHART - DETAILED REGIONAL VIEWS (RIGHT & LEFT)", bold: true, size: 22 })],
-              spacing: { before: 0, after: 120 },
-            }),
             gChart,
             sp(60, 60),
             gBox,
@@ -620,20 +635,31 @@ export const exportToWord = async (data: ReportData) => {
         sp(80, 40), para([run("i. Blood Collection (step 9)")]),
         forensicTable(smp, ["9A", "9B"]),
 
-        sp(120, 60),
-        para([run("7. X-ray for age estimation (if needed): ", { bold: true }), run("NOT APPLICABLE.")]),
+        // ── Section 7 & 8: X-ray + Potency Tests (own page) ──────────────
+        new Paragraph({ text: "", pageBreakBefore: true }),
+        para([run("7. X-ray for age estimation (if needed) : ", { bold: true }), run("NOT APPLICABLE.")]),
         sp(60, 40),
         para([run("8. Tests advised for potency / impotency (Wherever required)", { bold: true })]),
         para([run("   1. Blood Sample Collection (EDTA) for following tests:")], { before: 40, after: 20 }),
-        para([run("      • GTT (Glucose Tolerance Test)   • Serum Electrolytes   • Serum Creatinine")], { before: 10, after: 10 }),
-        para([run("      • Liver Function Tests (LFT)   • Full Blood Count, Hemogram, Esr, Hb")], { before: 10, after: 10 }),
-        para([run("      • Serum Prolactin Level   • Thyroid Function Test   • Serum Testosterone   • SHBG")], { before: 10, after: 20 }),
+        para([run("      • GTT (Glucose Tolerance Test)")], { before: 0, after: 10 }),
+        para([run("      • Serum Electrolytes")], { before: 0, after: 10 }),
+        para([run("      • Serum Creatinine")], { before: 0, after: 10 }),
+        para([run("      • Liver Function Tests (LFT)")], { before: 0, after: 10 }),
+        para([run("      • Full Blood Count, Hemogram, Esr, Hb")], { before: 0, after: 10 }),
+        para([run("      • Serum Prolactin Level")], { before: 0, after: 10 }),
+        para([run("      • Thyroid Function Test")], { before: 0, after: 10 }),
+        para([run("      • Serum Testosterone")], { before: 0, after: 10 }),
+        para([run("      • Sex Hormone Binding Globulin (SHBG)")], { before: 0, after: 20 }),
         para([run("   2. Accused referred for special investigation for confirmation of potency (if required):")], { before: 40, after: 20 }),
-        para([run("      • Nocturnal Penile Tumescence (NPT)   • Cavernosography   • PIPE Test")], { before: 10, after: 10 }),
-        para([run("      • Doppler Studies   • Pudendal Arteriography   • Pharmacocavernosometry")], { before: 10, after: 40 }),
+        para([run("      • Nocturnal Penile Tumescence (NPT)")], { before: 0, after: 10 }),
+        para([run("      • Cavernosography")], { before: 0, after: 10 }),
+        para([run("      • Pharmacologically Induced Penile Erection (PIPE) Test")], { before: 0, after: 10 }),
+        para([run("      • Doppler Studies")], { before: 0, after: 10 }),
+        para([run("      • Pudendal Arteriography")], { before: 0, after: 10 }),
+        para([run("      • Pharmacocavernosometry")], { before: 0, after: 40 }),
 
-        // ── Opinion ────────────────────────────────────────────────────────
-        sp(140, 60),
+        // ── Opinion (own page) ─────────────────────────────────────────────
+        new Paragraph({ text: "", pageBreakBefore: true }),
         secHeader("Opinion: (May be given as format attached as Appendix A)"),
         para([run("1. " + opin.sexualCapability)]),
         para([run("2. " + opin.bodilyInjuries)]),
