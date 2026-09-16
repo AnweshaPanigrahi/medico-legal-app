@@ -6,6 +6,7 @@ import {
 } from "docx";
 import { saveAs } from "file-saver";
 import type { ReportData } from "../types/report";
+import { image1Base64, image2Base64, image3Base64 } from "./imageData";
 
 const THIN_BORDER = { style: BorderStyle.SINGLE, size: 6, color: "000000" };
 const NO_BORDER  = { style: BorderStyle.NONE,   size: 0, color: "auto"   };
@@ -16,11 +17,15 @@ const MARGIN = convertMillimetersToTwip(20);
 
 function dots(n = 50) { return '.'.repeat(n); }
 
-// Fetch a public image and return its bytes
-async function fetchImage(url: string): Promise<Uint8Array> {
-  const res = await fetch(url);
-  const buf = await res.arrayBuffer();
-  return new Uint8Array(buf);
+// Decode bundled base64 image data to Uint8Array for docx embedding
+function base64ToUint8Array(base64: string): Uint8Array {
+  const clean = base64.replace(/^data:image\/[a-z]+;base64,/, "");
+  const binary = atob(clean);
+  const bytes = new Uint8Array(binary.length);
+  for (let i = 0; i < binary.length; i++) {
+    bytes[i] = binary.charCodeAt(i);
+  }
+  return bytes;
 }
 
 function makeImageRun(data: Uint8Array, widthPx: number, heightPx: number) {
@@ -268,12 +273,10 @@ export const exportToWord = async (data: ReportData) => {
     bodyMapMarks, forensicSamples: smp,
     opinion: opin, doctorDetails: doc_det } = data;
 
-  // Fetch the three body map images from the public folder
-  const [img1, img2, img3] = await Promise.all([
-    fetchImage("/image1.png"),
-    fetchImage("/image2.png"),
-    fetchImage("/image3.png"),
-  ]);
+  // Decode the three body map images directly from bundled data (no 404/network issues)
+  const img1 = base64ToUint8Array(image1Base64);
+  const img2 = base64ToUint8Array(image2Base64);
+  const img3 = base64ToUint8Array(image3Base64);
 
 
   const doc = new Document({
@@ -331,11 +334,11 @@ export const exportToWord = async (data: ReportData) => {
 
         // ── 3. Examined in presence of ─────────────────────────────────────
         para([run("3. Examined in presence of", { bold: true }), run(dots(80))]),
-        para([run("   Place of Examination: ", { bold: true }), run(acc.placeOfExamination || "Dept of FM&T, SCB MCH, KATAKA")]),
-        para([run("   Date and Time of Examination: ", { bold: true }), run(acc.dateTimeOfExamination || dots(25))]),
+        para([run("    Place of Examination: - ", { bold: true }), run(acc.placeOfExamination || "Dept of FM&T, SCB MCH, KATAKA")]),
+        para([run("    Date and Time of Examination: - ", { bold: true }), run(acc.dateTimeOfExamination || dots(25))]),
 
-        // ── LTI / RTI / PHOTO (inline, label at top) ──────────────────────
-        sp(120, 80),
+        // ── LTI / RTI / PHOTO (Image 2 style: centered horizontally & vertically) ──
+        sp(80, 80),
         new Table({
           width: { size: 100, type: WidthType.PERCENTAGE },
           borders: { top: THIN_BORDER, bottom: THIN_BORDER, left: THIN_BORDER, right: THIN_BORDER, insideVertical: THIN_BORDER, insideHorizontal: NO_BORDER },
@@ -343,10 +346,10 @@ export const exportToWord = async (data: ReportData) => {
             new TableRow({
               children: ["CLEAR LTI", "CLEAR RTI", "PHOTO"].map(label =>
                 new TableCell({
-                  width: { size: 33, type: WidthType.PERCENTAGE },
+                  width: { size: 33.33, type: WidthType.PERCENTAGE },
                   borders: { top: THIN_BORDER, bottom: THIN_BORDER, left: THIN_BORDER, right: THIN_BORDER },
-                  verticalAlign: VerticalAlign.TOP,
-                  margins: { top: 200, bottom: 3200, left: 400, right: 400 },
+                  verticalAlign: VerticalAlign.CENTER,
+                  margins: { top: 1200, bottom: 1200, left: 150, right: 150 },
                   children: [new Paragraph({ alignment: AlignmentType.CENTER, children: [new TextRun({ text: label, size: 20 })] })],
                 })
               ),
@@ -621,26 +624,16 @@ export const exportToWord = async (data: ReportData) => {
         para([run("7. X-ray for age estimation (if needed): ", { bold: true }), run("NOT APPLICABLE.")]),
         sp(60, 40),
         para([run("8. Tests advised for potency / impotency (Wherever required)", { bold: true })]),
-        para([run("   1. Blood Sample Collection (EDTA) for following tests:")]),
-        para([run("      • GTT (Glucose Tolerance Test)")]),
-        para([run("      • Serum Electrolytes")]),
-        para([run("      • Serum Creatinine")]),
-        para([run("      • Liver Function Tests (LFT)")]),
-        para([run("      • Full Blood Count, Hemogram, Esr, Hb")]),
-        para([run("      • Serum Prolactin Level")]),
-        para([run("      • Thyroid Function Test")]),
-        para([run("      • Serum Testosterone")]),
-        para([run("      • Sex Hormone Binding Globulin (SHBG)")]),
-        para([run("   2. Accused referred for special investigation for confirmation of potency (if required):")]),
-        para([run("      • Nocturnal Penile Tumescence (NPT)")]),
-        para([run("      • Cavernosography")]),
-        para([run("      • Pharmacologically Induced Penile Erection (PIPE) Test")]),
-        para([run("      • Doppler Studies")]),
-        para([run("      • Pudendal Arteriography")]),
-        para([run("      • Pharmacocavernosometry")]),
+        para([run("   1. Blood Sample Collection (EDTA) for following tests:")], { before: 40, after: 20 }),
+        para([run("      • GTT (Glucose Tolerance Test)   • Serum Electrolytes   • Serum Creatinine")], { before: 10, after: 10 }),
+        para([run("      • Liver Function Tests (LFT)   • Full Blood Count, Hemogram, Esr, Hb")], { before: 10, after: 10 }),
+        para([run("      • Serum Prolactin Level   • Thyroid Function Test   • Serum Testosterone   • SHBG")], { before: 10, after: 20 }),
+        para([run("   2. Accused referred for special investigation for confirmation of potency (if required):")], { before: 40, after: 20 }),
+        para([run("      • Nocturnal Penile Tumescence (NPT)   • Cavernosography   • PIPE Test")], { before: 10, after: 10 }),
+        para([run("      • Doppler Studies   • Pudendal Arteriography   • Pharmacocavernosometry")], { before: 10, after: 40 }),
 
         // ── Opinion ────────────────────────────────────────────────────────
-        new Paragraph({ text: "", pageBreakBefore: true }),
+        sp(140, 60),
         secHeader("Opinion: (May be given as format attached as Appendix A)"),
         para([run("1. " + opin.sexualCapability)]),
         para([run("2. " + opin.bodilyInjuries)]),
@@ -650,7 +643,7 @@ export const exportToWord = async (data: ReportData) => {
         para([run("6. " + opin.forensicSamples)]),
 
         // ── Signature Block ────────────────────────────────────────────────
-        sp(400, 40),
+        sp(250, 40),
         new Table({
           width: { size: 100, type: WidthType.PERCENTAGE },
           borders: NO_BORDERS,

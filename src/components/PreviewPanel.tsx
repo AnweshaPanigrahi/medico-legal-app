@@ -1,6 +1,7 @@
 import React, { useRef, useEffect, useState } from 'react';
 import type { ReportData } from '../types/report';
 import { exportToWord } from '../utils/exportToWord';
+import { image1Base64, image2Base64, image3Base64 } from '../utils/imageData';
 
 interface PreviewPanelProps {
   data: ReportData;
@@ -96,7 +97,7 @@ export const PreviewPanel: React.FC<PreviewPanelProps> = ({ data }) => {
           <div style={{ flex: 1, borderLeft: '1px solid #000', borderRight: '1px solid #000', padding: '8px 12px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
             <div style={{ position: 'relative', display: 'inline-block' }}>
               <img
-                src="image1.png"
+                src={`data:image/png;base64,${image1Base64}`}
                 alt="Body Map - Anterior and Posterior View"
                 style={{ maxHeight: '420px', maxWidth: '100%', display: 'block', margin: '0 auto' }}
               />
@@ -148,7 +149,7 @@ export const PreviewPanel: React.FC<PreviewPanelProps> = ({ data }) => {
           <div style={{ flex: 1, borderLeft: '1px solid #000', borderRight: '1px solid #000', padding: '8px 12px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
             <div style={{ position: 'relative', display: 'inline-block' }}>
               <img
-                src="image2.png"
+                src={`data:image/png;base64,${image2Base64}`}
                 alt="Body Map - Lateral & Inner Views"
                 style={{ maxHeight: '430px', maxWidth: '100%', display: 'block', margin: '0 auto' }}
               />
@@ -192,7 +193,7 @@ export const PreviewPanel: React.FC<PreviewPanelProps> = ({ data }) => {
             </div>
             <div style={{ position: 'relative', display: 'inline-block' }}>
               <img
-                src="image3.png"
+                src={`data:image/png;base64,${image3Base64}`}
                 alt="Genital Map Chart - Detailed Regional Views"
                 style={{ maxHeight: '390px', maxWidth: '100%', display: 'block', margin: '0 auto' }}
               />
@@ -448,51 +449,39 @@ export const PreviewPanel: React.FC<PreviewPanelProps> = ({ data }) => {
               </div>
             </div>
 
+            {/* LTI / RTI / PHOTO - inline matching Image 2 */}
+            <div style={{ margin: '14px 0 16px 0' }}>
+              <table style={{ width: '100%', borderCollapse: 'collapse', border: '1px solid #777', tableLayout: 'fixed' }}>
+                <tbody>
+                  <tr>
+                    <td style={{ width: '33.33%', height: '140px', textAlign: 'center', verticalAlign: 'middle', border: '1px solid #777', fontSize: '11pt', letterSpacing: '0.5px' }}>
+                      CLEAR LTI
+                    </td>
+                    <td style={{ width: '33.33%', height: '140px', textAlign: 'center', verticalAlign: 'middle', border: '1px solid #777', fontSize: '11pt', letterSpacing: '0.5px' }}>
+                      CLEAR RTI
+                    </td>
+                    <td style={{ width: '33.33%', height: '140px', textAlign: 'center', verticalAlign: 'middle', border: '1px solid #777', fontSize: '11pt', letterSpacing: '0.5px' }}>
+                      PHOTO
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
           </div>
 
           <div className="report-section">
             <div className="report-section-title">4. Marks of Identification:</div>
             <div className="data-row">
               <span className="data-label">(1)</span>
-              <span className="data-value">{data.identificationMarks.mark1}</span>
+              <span className="data-value">{data.identificationMarks.mark1 ? data.identificationMarks.mark1 : '.................................................................................................................................'}</span>
             </div>
             <div className="data-row">
               <span className="data-label">(2)</span>
-              <span className="data-value">{data.identificationMarks.mark2}</span>
+              <span className="data-value">{data.identificationMarks.mark2 ? data.identificationMarks.mark2 : '.................................................................................................................................'}</span>
             </div>
           </div>
 
-        </div>
-
-        {/* PAGE 1.5 - LTI / RTI / PHOTO */}
-        <div className="report-paper page-break" style={{ display: 'flex', flexDirection: 'column' }}>
-          <div style={{ marginBottom: '12px', fontSize: '12pt', fontWeight: 'bold', textAlign: 'center' }}>
-            ACCUSED IDENTIFICATION (LTI / RTI / PHOTO)
-          </div>
-          <table style={{ width: '100%', flex: 1, borderCollapse: 'collapse', border: '2px solid #000', tableLayout: 'fixed', height: '100%' }}>
-            <tbody style={{ height: '100%' }}>
-              <tr style={{ height: '100%' }}>
-                <td style={{ width: '33.33%', textAlign: 'center', verticalAlign: 'middle', border: '2px solid #000', fontSize: '14pt', fontWeight: 'bold', letterSpacing: '1px', height: 'calc(297mm - 80px)' }}>
-                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', gap: '12px' }}>
-                    <div style={{ fontSize: '16pt', fontWeight: 'bold' }}>LTI</div>
-                    <div style={{ fontSize: '10pt', fontWeight: 'normal', color: '#555' }}>(Left Thumb Impression)</div>
-                  </div>
-                </td>
-                <td style={{ width: '33.33%', textAlign: 'center', verticalAlign: 'middle', border: '2px solid #000', fontSize: '14pt', fontWeight: 'bold', letterSpacing: '1px', height: 'calc(297mm - 80px)' }}>
-                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', gap: '12px' }}>
-                    <div style={{ fontSize: '16pt', fontWeight: 'bold' }}>RTI</div>
-                    <div style={{ fontSize: '10pt', fontWeight: 'normal', color: '#555' }}>(Right Thumb Impression)</div>
-                  </div>
-                </td>
-                <td style={{ width: '33.33%', textAlign: 'center', verticalAlign: 'middle', border: '2px solid #000', fontSize: '14pt', fontWeight: 'bold', letterSpacing: '1px', height: 'calc(297mm - 80px)' }}>
-                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', gap: '12px' }}>
-                    <div style={{ fontSize: '16pt', fontWeight: 'bold' }}>PHOTO</div>
-                    <div style={{ fontSize: '10pt', fontWeight: 'normal', color: '#555' }}>(Passport Size)</div>
-                  </div>
-                </td>
-              </tr>
-            </tbody>
-          </table>
         </div>
 
         {/* PAGE 2 */}
@@ -1038,52 +1027,6 @@ export const PreviewPanel: React.FC<PreviewPanelProps> = ({ data }) => {
               </div>
               <div style={{ marginTop: '6px', height: '42px', border: '1px solid #000', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '8.5pt', color: '#000', fontWeight: 'bold' }}>
                 Official seal
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* PAGE 9 - Thumb Impressions & Photo */}
-        <div className="report-paper page-break">
-          <div className="report-section" style={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
-            <div style={{
-              display: 'grid',
-              gridTemplateColumns: '1fr 1fr 1fr',
-              border: '2px solid black',
-              flex: 1,
-              marginTop: '20px',
-              marginBottom: '20px'
-            }}>
-              <div style={{
-                borderRight: '2px solid black',
-                display: 'flex',
-                flexDirection: 'column',
-                justifyContent: 'center',
-                alignItems: 'center'
-              }}>
-                <div style={{ fontWeight: 'bold', fontSize: '14pt', marginBottom: '8px' }}>LTI</div>
-                <div style={{ fontSize: '10pt' }}>(Left Thumb Impression)</div>
-              </div>
-              
-              <div style={{
-                borderRight: '2px solid black',
-                display: 'flex',
-                flexDirection: 'column',
-                justifyContent: 'center',
-                alignItems: 'center'
-              }}>
-                <div style={{ fontWeight: 'bold', fontSize: '14pt', marginBottom: '8px' }}>RTI</div>
-                <div style={{ fontSize: '10pt' }}>(Right Thumb Impression)</div>
-              </div>
-
-              <div style={{
-                display: 'flex',
-                flexDirection: 'column',
-                justifyContent: 'center',
-                alignItems: 'center'
-              }}>
-                <div style={{ fontWeight: 'bold', fontSize: '14pt', marginBottom: '8px' }}>PHOTO</div>
-                <div style={{ fontSize: '10pt' }}>(Passport Size)</div>
               </div>
             </div>
           </div>

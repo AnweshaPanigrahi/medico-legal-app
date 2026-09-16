@@ -1,6 +1,7 @@
 import React, { useState, useRef } from 'react';
 import type { BodyMapMark } from '../types/report';
 import { Plus, Trash2, X } from 'lucide-react';
+import { image1Base64, image2Base64, image3Base64 } from '../utils/imageData';
 
 interface BodyMapAnnotatorProps {
   value: BodyMapMark[];
@@ -96,7 +97,7 @@ export const BodyMapAnnotator: React.FC<BodyMapAnnotatorProps> = ({ value, onCha
               <span style={{ flex: 1, textAlign: 'center' }}>POSTERIOR</span>
             </div>
             <img
-              src="image1.png"
+              src={`data:image/png;base64,${image1Base64}`}
               alt="Anterior and Posterior Body Map"
               style={{ maxHeight: '380px', maxWidth: '100%', display: 'block', margin: '0 auto', pointerEvents: 'none', background: '#fff', padding: '4px', borderRadius: '4px' }}
             />
@@ -120,7 +121,7 @@ export const BodyMapAnnotator: React.FC<BodyMapAnnotatorProps> = ({ value, onCha
             style={{ position: 'relative', display: 'inline-block', cursor: 'crosshair', maxWidth: '100%', userSelect: 'none' }}
           >
             <img
-              src="image2.png"
+              src={`data:image/png;base64,${image2Base64}`}
               alt="Lateral Body Views"
               style={{ maxHeight: '380px', maxWidth: '100%', display: 'block', margin: '0 auto', pointerEvents: 'none', background: '#fff', padding: '4px', borderRadius: '4px' }}
             />
@@ -152,7 +153,7 @@ export const BodyMapAnnotator: React.FC<BodyMapAnnotatorProps> = ({ value, onCha
             </div>
             <div style={{ display: 'inline-block', background: '#fff', padding: '4px', borderRadius: '4px' }}>
               <img
-                src="image3.png"
+                src={`data:image/png;base64,${image3Base64}`}
                 alt="Genital Map Regional Views"
                 style={{ maxHeight: '380px', maxWidth: '100%', display: 'block', pointerEvents: 'none', margin: '0 auto' }}
               />
